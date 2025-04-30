@@ -30,26 +30,23 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
       run: |
         cat /etc/os-release
-
-        
-        sudo apt update
         
         sudo mkdir -p /etc/docker
-        ​
-        echo '{ "experimental": true }' > /etc/docker/daemon.json
+        
+        sudo echo '{ "experimental": true }' > /etc/docker/daemon.json
         
         sudo systemctl restart docker
         
         sudo docker run --rm --privileged multiarch/qemu-user-static --reset
         
-        echo -1 > /proc/sys/fs/binfmt_misc/qemu-mipsn32el
+        sudo echo -1 > /proc/sys/fs/binfmt_misc/qemu-mipsn32el
         
         ls -al
         sudo mkdir mipselout
 
-        echo 'sudo 7za a -m0=lzma2 -mx=9 -ms=on mipselout.7z mipselout/' > down.sh
+        sudo echo 'sudo 7za a -m0=lzma2 -mx=9 -ms=on mipselout.7z mipselout/' > down.sh
         
-        echo 'sudo docker run -it --rm -v /home/runner/work/dockermipsel/dockermipsel/mipselout:/mipselout --privileged multiarch/debian-debootstrap:mipsel-buster /bin/bash' > start.sh
+        sudo echo 'sudo docker run -it --rm -v /home/runner/work/dockermipsel/dockermipsel/mipselout:/mipselout --privileged multiarch/debian-debootstrap:mipsel-buster /bin/bash' > start.sh
         
         ls -al
     - name: SSH connection to Actions
