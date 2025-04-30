@@ -37,11 +37,11 @@ jobs:
         
         echo '{ "experimental": true }' | sudo tee /etc/docker/daemon.json
         
-        systemctl restart docker
+        sudo systemctl restart docker
         
         docker run --rm --privileged multiarch/qemu-user-static --reset
         
-        echo -1 > /proc/sys/fs/binfmt_misc/qemu-mipsn32el
+        sudo sh -c 'echo -1 > /proc/sys/fs/binfmt_misc/qemu-mipsel'
         
         ls -al
         mkdir mipselout
