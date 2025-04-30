@@ -27,17 +27,10 @@ jobs:
     # 启动 MIPSEL 容器并暴露 SSH
     - name: Start MIPSEL container with SSH
       run: |
-        docker run -d --name mipsel_test \
-          -p 2222:22 \
-          -e SSH_ENABLE=true \
-          -e SSH_PASSWORD=yourpassword \
+        docker run -itd --name mipsel_test \
           -v $(pwd):/workspace \
           multiarch/debian-debootstrap:mipsel-buster \
-          /bin/bash -c "apt-get update && \
-                        apt-get install -y openssh-server && \
-                        mkdir -p /var/run/sshd && \
-                        echo 'root:yourpassword' | chpasswd && \
-                        /usr/sbin/sshd -D"
+          /bin/bash
 
     # 使用 SSH 连接到容器
     - name: Connect via SSH
