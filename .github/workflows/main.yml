@@ -30,12 +30,28 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
       run: |
         cat /etc/os-release
+
+        sudo su
+        
+        apt update
+        
+        mkdir -p /etc/docker
+        ​
+        echo '{ "experimental": true }' > /etc/docker/daemon.json
+        
+        systemctl restart docker
+        
+        docker run --rm --privileged multiarch/qemu-user-static --reset
+        
+        echo -1 > /proc/sys/fs/binfmt_misc/qemu-mipsn32el
+        
         ls -al
         mkdir mipselout
 
+        echo '7za a -m0=lzma2 -mx=9 -ms=on mipselout.7z mipselout/' > down.sh
         
-        ls -al
-        7za a -m0=lzma2 -mx=9 -ms=on mipselout.7z mipselout/
+        echo 'docker run -it --rm -v /home/runner/work/dockermipsel/dockermipsel/mipselout:/mipselout --privileged multiarch/debian-debootstrap:mipsel-buster /bin/bash' > start.sh
+        
         ls -al
     - name: SSH connection to Actions
       uses: P3TERX/ssh2actions@v1.0.0
