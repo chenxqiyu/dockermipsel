@@ -1,44 +1,52 @@
 name: MIPSEL Docker Test with SSH
 
 on:
-  workflow_dispatch:  # 允许手动触发
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: true
+        default: 'true'
+
+env:
+  CONFIG_FILE: .config
+  DIY_P1_SH: diy-part1.sh
+  DIY_P2_SH: diy-part2.sh
+  UPLOAD_BIN_DIR: false
+  UPLOAD_FIRMWARE: true
+  UPLOAD_COWTRANSFER: false
+  UPLOAD_WETRANSFER: false
+  UPLOAD_RELEASE: false
+  TZ: Asia/Shanghai
 
 jobs:
-  mipsel-test:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30  # 设置超时时间
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    # 设置 QEMU 和 MIPSEL 环境
-    - name: Setup MIPSEL environment
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo apt-get update
-        sudo apt-get install -y qemu-user-static
-        docker run --rm --privileged multiarch/qemu-user-static --reset
-        docker run --rm --privileged multiarch/qemu-user-static --credential yes --persistent yes -p yes
+        cat /etc/os-release
+        ls -al
+        mkdir mipselout
 
-    # 启动 MIPSEL 容器并暴露 SSH
-    - name: Start MIPSEL container with SSH
-      run: |
-        docker run -itd --name mipsel_test \
-          -v $(pwd):/workspace \
-          multiarch/debian-debootstrap:mipsel-buster \
-          /bin/bash
-
-    # 使用 SSH 连接到容器
-    - name: Connect via SSH
+        
+        ls -al
+        7za a -m0=lzma2 -mx=9 -ms=on mipselout.7z mipselout/
+        ls -al
+    - name: SSH connection to Actions
       uses: P3TERX/ssh2actions@v1.0.0
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      env:
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
-    # 清理容器
-    - name: Clean up
-      if: always()  # 即使失败也执行清理
-      run: |
-        docker stop mipsel_test || true
-        docker rm mipsel_test || true
+    - name: Upload bin directory
+      uses: actions/upload-artifact@main
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: Download
+        path: mipselout.7z
