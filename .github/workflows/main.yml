@@ -36,13 +36,13 @@ jobs:
         
         sudo mkdir -p /etc/docker
         ​
-        sudo echo '{ "experimental": true }' > /etc/docker/daemon.json
+        echo '{ "experimental": true }' > /etc/docker/daemon.json
         
         sudo systemctl restart docker
         
         sudo docker run --rm --privileged multiarch/qemu-user-static --reset
         
-        sudo echo -1 > /proc/sys/fs/binfmt_misc/qemu-mipsn32el
+        echo -1 > /proc/sys/fs/binfmt_misc/qemu-mipsn32el
         
         ls -al
         sudo mkdir mipselout
